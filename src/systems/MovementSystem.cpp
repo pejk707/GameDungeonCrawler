@@ -71,7 +71,19 @@ MoveResult MovementSystem::move(Direction dir, GameContext& ctx) const {
     return result;
 }
 
+bool MovementSystem::engageAggressive(GameContext& ctx) const {
+    RoomState& room = ctx.world.currentRoom();
+    for (std::size_t i = 0; i < room.enemies.size(); ++i) {
+        if (room.enemies[i].behavior == Behavior::Aggressive) {
+            ctx.sys.combat.begin(i, false, ctx);
+            return true;
+        }
+    }
+    return false;
+}
+
 void MovementSystem::arrive(GameContext& ctx) const {
+    if (engageAggressive(ctx)) return;  // агрессивный враг нападает сразу
     const bool see = ctx.sys.light.canSee(ctx);
     RoomState& room = ctx.world.currentRoom();
     for (std::size_t i = 0; i < room.enemies.size(); ++i) {
@@ -107,6 +119,7 @@ void MovementSystem::wakeEnemy(std::size_t index, GameContext& ctx) const {
     e.behavior = Behavior::Aggressive;
     e.wakeIn = -1;
     ctx.sayFmt(MsgType::Damage, "enemy.woke", {{"enemy", ctx.data.enemy(e.def).name}});
+    ctx.sys.combat.begin(index, false, ctx);
 }
 
 }  // namespace ll

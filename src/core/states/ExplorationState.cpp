@@ -10,8 +10,15 @@ namespace ll {
 void ExplorationState::onEnter(GameContext& ctx) {
     pending_.reset();
     const bool afterCombat = ctx.previousState == StateId::Combat;
-    RoomDescriber::describe(ctx, afterCombat, !afterCombat && ctx.world.stats.turns == 0);
-    if (!afterCombat) ctx.sys.movement.arrive(ctx);
+    if (afterCombat) {
+        // После победы — коротко (лут и выходы); после бегства — новая комната целиком.
+        const bool sameRoom = ctx.world.player.location == ctx.lastCombatRoom;
+        RoomDescriber::describe(ctx, sameRoom, false);
+        ctx.sys.movement.engageAggressive(ctx);  // в комнате мог остаться ещё один враг
+        return;
+    }
+    RoomDescriber::describe(ctx, false, ctx.world.stats.turns == 0);
+    ctx.sys.movement.arrive(ctx);
 }
 
 Transition ExplorationState::handleInput(GameContext& ctx, const std::string& line) {

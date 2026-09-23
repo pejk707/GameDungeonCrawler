@@ -300,6 +300,34 @@ public:
     }
 };
 
+// ---------- бой ----------
+
+class AttackHandler final : public HandlerBase {
+public:
+    ActionResult execute(const ParsedCommand& cmd, GameContext& ctx) override {
+        ActionResult result;
+        const RoomState& room = ctx.world.currentRoom();
+        if (room.enemies.empty()) {
+            ctx.sayKey(MsgType::System, "attack.nobody");
+            return result;
+        }
+        std::size_t index = 0;
+        if (!cmd.object.empty()) {
+            const auto ref = find(cmd.object, scope::Enemies | scope::Objects, ctx, result);
+            if (!ref) return result;
+            if (ref->kind != EntityKind::Enemy) {
+                ctx.sayKey(MsgType::System, "attack.object");
+                return result;
+            }
+            index = ref->index;
+        }
+        // По спящему (или только потревоженному) врагу — внезапная атака ×2.
+        const bool sneak = room.enemies[index].behavior == Behavior::Sleeping;
+        ctx.sys.combat.begin(index, sneak, ctx);
+        return ActionResult::turn();
+    }
+};
+
 class RestHandler final : public HandlerBase {
 public:
     ActionResult execute(const ParsedCommand&, GameContext& ctx) override {
@@ -432,6 +460,7 @@ CommandRegistry makeExplorationCommands() {
     r.add(Verb::LanternOn, std::make_unique<LanternHandler>(true));
     r.add(Verb::LanternOff, std::make_unique<LanternHandler>(false));
     r.add(Verb::Light, std::make_unique<LightHandler>());
+    r.add(Verb::Attack, std::make_unique<AttackHandler>());
     r.add(Verb::Rest, std::make_unique<RestHandler>());
     r.add(Verb::Inventory, std::make_unique<InventoryHandler>());
     r.add(Verb::Status, std::make_unique<StatusHandler>());

@@ -16,6 +16,7 @@ std::string encode(char32_t c);
 std::string toLower(std::string_view s);  // латиница и кириллица, включая Ё
 std::string toUpper(std::string_view s);
 std::string fold(std::string_view s);     // нижний регистр + «ё» → «е»: форма для сравнения слов
+std::string capitalize(std::string_view s);  // первая буква — заглавная
 std::size_t length(std::string_view s);
 
 std::string padRight(std::string_view s, std::size_t width);

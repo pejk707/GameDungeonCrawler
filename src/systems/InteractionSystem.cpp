@@ -50,14 +50,7 @@ void InteractionSystem::apply(const Effect& effect, GameContext& ctx) const {
                    [&](const ConsumeItem& e) { ctx.world.player.inventory.remove(e.item, e.count); },
                    [&](const RevealExit& e) { ctx.world.room(e.room).revealedExits.insert(e.dir); },
                    [&](const UnlockExit& e) { ctx.world.room(e.room).unlockedExits.insert(e.dir); },
-                   [&](const SpawnEnemy& e) {
-                       EnemyInstance inst;
-                       inst.def = e.enemy;
-                       inst.hp = ctx.data.enemy(e.enemy).hp;
-                       ctx.world.currentRoom().enemies.push_back(inst);
-                       const auto& intro = ctx.data.enemy(e.enemy).introText;
-                       if (!intro.empty()) ctx.say(MsgType::Damage, intro);
-                   },
+                   [&](const SpawnEnemy& e) { ctx.sys.combat.spawnAndBegin(e.enemy, ctx); },
                    [&](const SpendOil& e) { ctx.sys.light.spendOil(e.amount, ctx); },
                    [&](const AddOil& e) {
                        const int added = ctx.sys.light.addOil(e.amount, ctx);

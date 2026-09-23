@@ -1,5 +1,6 @@
 #include "core/GameContext.h"
 
+#include "common/Utf8.h"
 #include "model/WorldFactory.h"
 
 namespace ll {
@@ -26,6 +27,11 @@ std::optional<StateId> GameContext::takePending() {
     auto p = pendingState;
     pendingState.reset();
     return p;
+}
+
+void GameContext::say(MsgType type, std::string text) {
+    const bool preformatted = type == MsgType::Art || type == MsgType::Map || type == MsgType::Status;
+    log.push(type, preformatted ? std::move(text) : utf8::capitalize(text));
 }
 
 void GameContext::newGame() {

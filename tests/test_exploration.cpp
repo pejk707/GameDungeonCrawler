@@ -63,6 +63,8 @@ TEST_CASE("тьма: без света смерть на четвёртом хо
     test::GameHarness h;
     h.cmd("1");
     h.player().inventory.add("gate_key");
+    h.world().room("gate_hall").enemies.clear();  // проверяем тьму, а не бой
+    h.world().room("great_stair").enemies.clear();
     h.cmd("с");
     h.cmd("с");  // привратный зал, тёмный
     REQUIRE(h.player().location == "gate_hall");

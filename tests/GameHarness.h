@@ -25,6 +25,13 @@ public:
         return game_.takeOutput();
     }
 
+    // Перенести игрока в комнату (для тестов отдельных механик).
+    void teleport(const RoomId& room) {
+        player().previousLocation = player().location;
+        player().location = room;
+        world().room(room).visited = true;
+    }
+
     Game& game() { return game_; }
     GameContext& ctx() { return game_.context(); }
     WorldState& world() { return game_.context().world; }

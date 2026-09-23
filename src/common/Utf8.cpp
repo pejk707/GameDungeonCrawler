@@ -111,6 +111,12 @@ std::string fold(std::string_view s) {
     return encode(u);
 }
 
+std::string capitalize(std::string_view s) {
+    std::u32string u = decode(s);
+    if (!u.empty()) u[0] = upperCp(u[0]);
+    return encode(u);
+}
+
 std::string toUpper(std::string_view s) {
     std::u32string u = decode(s);
     for (auto& c : u) c = upperCp(c);

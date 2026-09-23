@@ -34,6 +34,7 @@ struct GameContext {
     StateId previousState = StateId::MainMenu;
     std::optional<StateId> pendingState;  // запрос смены режима от систем
     std::string deathCause;
+    RoomId lastCombatRoom;  // где начался последний бой (после бегства комнату описываем заново)
 
     // Запрос перехода. Если запросов несколько, побеждает самый важный: GameOver > Victory > Combat.
     void request(StateId state);
@@ -46,11 +47,10 @@ struct GameContext {
     std::string fmt(const std::string& key, const StringTable::Args& args) const {
         return data.strings.format(key, args);
     }
-    void say(MsgType type, std::string text) { log.push(type, std::move(text)); }
-    void sayKey(MsgType type, const std::string& key) { log.push(type, str(key)); }
-    void sayFmt(MsgType type, const std::string& key, const StringTable::Args& args) {
-        log.push(type, fmt(key, args));
-    }
+    // Сообщения начинаются с заглавной буквы: «{enemy} бьёт вас» → «Пещерная крыса бьёт вас».
+    void say(MsgType type, std::string text);
+    void sayKey(MsgType type, const std::string& key) { say(type, str(key)); }
+    void sayFmt(MsgType type, const std::string& key, const StringTable::Args& args) { say(type, fmt(key, args)); }
 };
 
 }  // namespace ll

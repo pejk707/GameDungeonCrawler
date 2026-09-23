@@ -21,6 +21,7 @@ class MovementSystem {
 public:
     MoveResult move(Direction dir, GameContext& ctx) const;
     void arrive(GameContext& ctx) const;  // после описания комнаты: враги и подсказки
+    bool engageAggressive(GameContext& ctx) const;  // начать бой с бодрствующим врагом, если он есть
     bool retreat(GameContext& ctx) const;  // бегство из боя в предыдущую комнату
     void wakeEnemy(std::size_t index, GameContext& ctx) const;
 

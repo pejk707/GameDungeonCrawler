@@ -2,7 +2,9 @@
 
 #include <chrono>
 
+#include "core/states/CombatState.h"
 #include "core/states/ExplorationState.h"
+#include "core/states/GameOverState.h"
 #include "core/states/MainMenuState.h"
 #include "data/DataLoader.h"
 #include "data/DataValidator.h"
@@ -44,6 +46,8 @@ bool Game::init() {
 
     fsm_.add(StateId::MainMenu, std::make_unique<MainMenuState>());
     fsm_.add(StateId::Exploration, std::make_unique<ExplorationState>());
+    fsm_.add(StateId::Combat, std::make_unique<CombatState>());
+    fsm_.add(StateId::GameOver, std::make_unique<GameOverState>());
     return true;
 }
 
