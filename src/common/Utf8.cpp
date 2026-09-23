@@ -102,6 +102,15 @@ std::string toLower(std::string_view s) {
     return encode(u);
 }
 
+std::string fold(std::string_view s) {
+    std::u32string u = decode(s);
+    for (auto& c : u) {
+        c = lowerCp(c);
+        if (c == 0x451) c = 0x435;  // ё → е
+    }
+    return encode(u);
+}
+
 std::string toUpper(std::string_view s) {
     std::u32string u = decode(s);
     for (auto& c : u) c = upperCp(c);

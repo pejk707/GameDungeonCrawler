@@ -1,0 +1,45 @@
+{
+  "player": {
+    "start_room": "gate_road",
+    "hp": 30,
+    "atk": 1,
+    "oil": 80,
+    "oil_max": 100,
+    "inventory": ["lantern", "leather_jacket"],
+    "equipped": ["leather_jacket"]
+  },
+  "oil_cost": { "move_dark": 2, "flare": 8, "brazier": 10 },
+  "darkness_turns_to_death": 4,
+  "oil_warnings": [25, 10],
+  "combat": {
+    "crit_chance": 0.10,
+    "crit_mult": 2.0,
+    "block_mult": 0.25,
+    "counter_mult": 1.5,
+    "guard_mult": 0.5,
+    "flee_chance": 0.6,
+    "dark_miss_chance": 0.5,
+    "photophobia_mult": 1.5,
+    "flare_damage": 6
+  },
+  "score": {
+    "base": 1000,
+    "per_oil": 5,
+    "per_note": 50,
+    "per_turn": 1,
+    "per_death": 100,
+    "master": 1200,
+    "lamplighter": 900
+  },
+  "embers": ["ember_depths", "ember_forge", "ember_memory"],
+  "total_notes": 8,
+  "width": 78,
+  "texts": {
+    "title": "art/title.txt",
+    "victory": "art/endings/victory.txt",
+    "death": "art/endings/death.txt",
+    "intro": "data/lang/ru/intro.txt",
+    "epilogue_a": "data/lang/ru/epilogue/a.txt",
+    "epilogue_b": "data/lang/ru/epilogue/b.txt"
+  }
+}
