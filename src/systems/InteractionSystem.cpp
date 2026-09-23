@@ -72,16 +72,26 @@ InteractionOutcome InteractionSystem::run(Trigger trigger, const std::optional<I
     if (!def) return InteractionOutcome::NotApplicable;
     ObjectState& os = ctx.world.currentRoom().objects[object];
 
-    int index = -1;
+    // Кандидаты — взаимодействия с подходящим триггером (и предметом). Выбираем первое,
+    // чьи условия выполнены; если таких нет — первое подходящее, и срабатывает его onFail.
+    std::vector<int> matching;
     for (std::size_t i = 0; i < def->interactions.size(); ++i) {
         const InteractionDef& in = def->interactions[i];
         if (in.trigger != trigger) continue;
         if (trigger == Trigger::Use && in.useItem != item) continue;
         if (in.once && os.doneInteractions.count(static_cast<int>(i))) continue;
-        index = static_cast<int>(i);
-        break;
+        matching.push_back(static_cast<int>(i));
     }
-    if (index < 0) return InteractionOutcome::NotApplicable;
+    if (matching.empty()) return InteractionOutcome::NotApplicable;
+    int index = -1;
+    for (int i : matching) {
+        if (allMet(def->interactions[static_cast<std::size_t>(i)].conditions, ctx)) {
+            index = i;
+            break;
+        }
+    }
+    const bool success = index >= 0;
+    if (!success) index = matching.front();
     const InteractionDef& in = def->interactions[static_cast<std::size_t>(index)];
 
     // Автоматические требования: не путать штраф загадки с простой нехваткой ресурса.
@@ -89,17 +99,17 @@ InteractionOutcome InteractionSystem::run(Trigger trigger, const std::optional<I
         ctx.sayFmt(MsgType::System, "interaction.empty", {{"object", def->name}});
         return InteractionOutcome::Refused;
     }
-    if (trigger == Trigger::Light && !ctx.sys.light.lanternBurning(ctx)) {
+    const int oil = oilNeeded(success ? in.effects : in.onFail);
+    if (trigger == Trigger::Light && oil > 0 && !ctx.sys.light.lanternBurning(ctx)) {
         ctx.sayKey(MsgType::System, "light.need_lantern");
         return InteractionOutcome::Refused;
     }
-    const int oil = std::max(oilNeeded(in.effects), oilNeeded(in.onFail));
     if (oil > 0 && ctx.world.player.oil < oil) {
         ctx.sayFmt(MsgType::System, "light.need_oil", {{"oil", std::to_string(oil)}});
         return InteractionOutcome::Refused;
     }
 
-    if (allMet(in.conditions, ctx)) {
+    if (success) {
         if (!in.message.empty()) ctx.say(MsgType::Text, in.message);
         for (const auto& e : in.effects) apply(e, ctx);
         if (in.once) os.doneInteractions.insert(index);
