@@ -1,0 +1,18 @@
+# Build
+build/
+out/
+cmake-build-*/
+CMakeUserPresets.json
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+
+# Game saves
+saves/
+
+# OS
+.DS_Store
+Thumbs.db
