@@ -6,6 +6,7 @@
 #include "core/states/ExplorationState.h"
 #include "core/states/GameOverState.h"
 #include "core/states/MainMenuState.h"
+#include "core/states/VictoryState.h"
 #include "data/DataLoader.h"
 #include "data/DataValidator.h"
 #include "model/WorldFactory.h"
@@ -48,6 +49,7 @@ bool Game::init() {
     fsm_.add(StateId::Exploration, std::make_unique<ExplorationState>());
     fsm_.add(StateId::Combat, std::make_unique<CombatState>());
     fsm_.add(StateId::GameOver, std::make_unique<GameOverState>());
+    fsm_.add(StateId::Victory, std::make_unique<VictoryState>());
     return true;
 }
 

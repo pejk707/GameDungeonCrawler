@@ -41,6 +41,8 @@ struct GameContext {
     std::optional<StateId> takePending();
 
     void newGame();
+    bool saveGame();  // с сообщением об ошибке, если записать не удалось
+    bool loadGame();  // заменяет world сохранённым состоянием; false — сохранения нет или оно повреждено
 
     // Короткие помощники для сообщений.
     std::string str(const std::string& key) const { return data.strings.get(key); }

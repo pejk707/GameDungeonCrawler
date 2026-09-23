@@ -7,6 +7,7 @@
 #include "core/Systems.h"
 #include "systems/ItemUse.h"
 #include "systems/PlayerStats.h"
+#include "ui/MapRenderer.h"
 #include "ui/RoomDescriber.h"
 
 namespace ll {
@@ -344,7 +345,43 @@ public:
         PlayerState& p = ctx.world.player;
         p.hp = p.maxHp;
         ctx.sayKey(MsgType::Heal, "rest.ok");
-        return ActionResult::turn();
+        ctx.world.stats.turns += 1;  // отдых — это ход; сохраняем уже после него
+        if (ctx.saveGame()) ctx.sayKey(MsgType::Oil, "save.auto");
+        return ActionResult::noTurn();
+    }
+};
+
+// ---------- сохранение и карта ----------
+
+class SaveHandler final : public HandlerBase {
+public:
+    ActionResult execute(const ParsedCommand&, GameContext& ctx) override {
+        const RoomDef& def = ctx.data.room(ctx.world.player.location);
+        if (!def.brazier() || !ctx.world.currentRoom().lit) {
+            ctx.sayKey(MsgType::System, "save.no_fire");
+            return ActionResult::noTurn();
+        }
+        if (ctx.saveGame()) ctx.sayKey(MsgType::Oil, "save.ok");
+        return ActionResult::noTurn();
+    }
+};
+
+class LoadHandler final : public HandlerBase {
+public:
+    ActionResult execute(const ParsedCommand&, GameContext& ctx) override {
+        if (ctx.loadGame()) RoomDescriber::describe(ctx);
+        return ActionResult::noTurn();
+    }
+};
+
+class MapHandler final : public HandlerBase {
+public:
+    ActionResult execute(const ParsedCommand&, GameContext& ctx) override {
+        const ZoneDef* zone = ctx.data.findZone(ctx.data.room(ctx.world.player.location).zone);
+        ctx.sayFmt(MsgType::Title, "map.title", {{"zone", zone ? zone->name : std::string{}}});
+        ctx.say(MsgType::Map, MapRenderer::render(ctx));
+        ctx.sayKey(MsgType::System, "map.legend");
+        return ActionResult::noTurn();
     }
 };
 
@@ -462,6 +499,9 @@ CommandRegistry makeExplorationCommands() {
     r.add(Verb::Light, std::make_unique<LightHandler>());
     r.add(Verb::Attack, std::make_unique<AttackHandler>());
     r.add(Verb::Rest, std::make_unique<RestHandler>());
+    r.add(Verb::Save, std::make_unique<SaveHandler>());
+    r.add(Verb::Load, std::make_unique<LoadHandler>());
+    r.add(Verb::Map, std::make_unique<MapHandler>());
     r.add(Verb::Inventory, std::make_unique<InventoryHandler>());
     r.add(Verb::Status, std::make_unique<StatusHandler>());
     r.add(Verb::Journal, std::make_unique<JournalHandler>());

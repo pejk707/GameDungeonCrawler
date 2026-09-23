@@ -2,6 +2,7 @@
 
 #include "common/Utf8.h"
 #include "core/GameContext.h"
+#include "core/Systems.h"
 #include "parser/TextNormalizer.h"
 
 namespace ll {
@@ -14,6 +15,7 @@ void MainMenuState::onEnter(GameContext& ctx) {
 void MainMenuState::showMenu(GameContext& ctx) const {
     ctx.log.blank();
     ctx.sayKey(MsgType::Title, "menu.options");
+    if (ctx.sys.save.exists(ctx.settings.savePath)) ctx.sayKey(MsgType::System, "menu.has_save");
 }
 
 Transition MainMenuState::handleInput(GameContext& ctx, const std::string& line) {
@@ -31,7 +33,7 @@ Transition MainMenuState::handleInput(GameContext& ctx, const std::string& line)
         return Transition::to(StateId::Exploration);
     }
     if (is("2", "прод") || w == "continue") {
-        ctx.sayKey(MsgType::System, "menu.no_save");
+        if (ctx.loadGame()) return Transition::to(StateId::Exploration);
         showMenu(ctx);
         return Transition::none();
     }

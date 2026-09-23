@@ -21,8 +21,9 @@ Transition GameOverState::handleInput(GameContext& ctx, const std::string& line)
     const auto tokens = TextNormalizer::tokenize(line);
     const std::string w = tokens.empty() ? std::string{} : tokens[0];
     if (w == "1" || w == "загрузить" || w == "load") {
-        ctx.sayKey(MsgType::System, "gameover.no_save");
-        return Transition::none();
+        if (!ctx.loadGame()) return Transition::none();
+        ctx.world.stats.deaths = deaths_;  // смерть учитывается и после загрузки
+        return Transition::to(StateId::Exploration);
     }
     if (w == "2" || w == "новая" || w == "new") {
         ctx.newGame();

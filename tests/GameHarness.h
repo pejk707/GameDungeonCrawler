@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
 
@@ -15,6 +16,11 @@ public:
     explicit GameHarness(std::uint32_t seed = 1)
         : game_(Options{LAMPLIGHTER_SOURCE_DIR, seed, true, 0}, std::make_unique<MemoryConsole>()) {
         REQUIRE(game_.init());
+        // Сохранения тестов — во временную папку, чтобы не трогать сохранение игрока.
+        savePath_ = (std::filesystem::temp_directory_path() / ("lamplighter_test_" + std::to_string(seed) + ".json"))
+                        .string();
+        game_.context().settings.savePath = savePath_;
+        std::filesystem::remove(savePath_);
         game_.start();
         game_.takeOutput();
     }
@@ -37,8 +43,11 @@ public:
     WorldState& world() { return game_.context().world; }
     PlayerState& player() { return game_.context().world.player; }
 
+    ~GameHarness() { std::filesystem::remove(savePath_); }
+
 private:
     Game game_;
+    std::string savePath_;
 };
 
 inline bool contains(const std::string& haystack, const std::string& needle) {

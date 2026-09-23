@@ -6,6 +6,8 @@
 #include "systems/InteractionSystem.h"
 #include "systems/LightSystem.h"
 #include "systems/MovementSystem.h"
+#include "systems/SaveSystem.h"
+#include "systems/ScoreSystem.h"
 
 namespace ll {
 
@@ -15,6 +17,8 @@ struct Systems {
     MovementSystem movement;
     InteractionSystem interaction;
     CombatSystem combat;
+    SaveSystem save;
+    ScoreSystem score;
     HintSystem hints;
     TurnSystem turn;
 };

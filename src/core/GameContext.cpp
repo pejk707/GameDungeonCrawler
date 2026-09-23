@@ -1,6 +1,7 @@
 #include "core/GameContext.h"
 
 #include "common/Utf8.h"
+#include "core/Systems.h"
 #include "model/WorldFactory.h"
 
 namespace ll {
@@ -37,6 +38,30 @@ void GameContext::say(MsgType type, std::string text) {
 void GameContext::newGame() {
     world = WorldFactory::create(data);
     deathCause.clear();
+}
+
+bool GameContext::saveGame() {
+    std::string error;
+    if (sys.save.save(world, settings.savePath, &error)) return true;
+    sayFmt(MsgType::Damage, "save.failed", {{"error", error}});
+    return false;
+}
+
+bool GameContext::loadGame() {
+    if (!sys.save.exists(settings.savePath)) {
+        sayKey(MsgType::System, "load.no_save");
+        return false;
+    }
+    std::string error;
+    auto loaded = sys.save.load(data, settings.savePath, &error);
+    if (!loaded) {
+        sayFmt(MsgType::Damage, "load.corrupted", {{"error", error}});
+        return false;
+    }
+    world = std::move(*loaded);  // тот же объект: ссылки на world остаются валидными
+    deathCause.clear();
+    sayKey(MsgType::Oil, "load.ok");
+    return true;
 }
 
 }  // namespace ll
