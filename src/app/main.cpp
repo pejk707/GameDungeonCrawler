@@ -99,7 +99,10 @@ int main(int argc, char** argv) {
             return 2;
         }
         ll::ScriptConsole::Timing timing;
-        if (demo) timing = {demoCharMs, 700, 300};
+        if (demo) {
+            timing = {demoCharMs, 700, 300};
+            if (console->supportsColor()) console->write("\x1b[2J\x1b[H");  // чистый экран для записи видео
+        }
         console = std::make_unique<ll::ScriptConsole>(std::move(console), std::move(lines), timing, true);
     }
 

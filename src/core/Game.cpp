@@ -89,6 +89,7 @@ int Game::run() {
         renderer_.flush(log_, *console_);
         return 1;
     }
+    if (renderer_.color()) console_->write("\x1b]0;Последний фонарщик\x07");  // заголовок окна
     start();
     while (running_) {
         if (!log_.empty()) log_.blank();

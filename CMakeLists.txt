@@ -20,11 +20,20 @@ target_include_directories(lamplighter_core PUBLIC src third_party)
 
 add_executable(lamplighter src/app/main.cpp)
 target_link_libraries(lamplighter PRIVATE lamplighter_core)
+# Исполняемый файл всегда лежит прямо в build/ (в том числе для генераторов Visual Studio).
+set_target_properties(lamplighter PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
 
-# Данные и ASCII-арт копируются рядом с исполняемым файлом.
-add_custom_command(TARGET lamplighter POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:lamplighter>/data
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/art $<TARGET_FILE_DIR:lamplighter>/art)
+# Данные и ASCII-арт копируются рядом с исполняемым файлом при каждой сборке
+# (отдельной целью — чтобы правки в JSON попадали в build/ даже без перекомпиляции).
+add_custom_target(copy_assets ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data ${CMAKE_BINARY_DIR}/data
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/art ${CMAKE_BINARY_DIR}/art
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/demo ${CMAKE_BINARY_DIR}/demo
+    COMMENT "Copying game data")
+add_dependencies(lamplighter copy_assets)
 
 option(LAMPLIGHTER_TESTS "Собирать модульные тесты" ON)
 if(LAMPLIGHTER_TESTS)
