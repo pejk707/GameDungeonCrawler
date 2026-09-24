@@ -41,7 +41,6 @@ cmake --build build
 | `--no-color` | без цветов |
 | `--width N` | ширина текста (по умолчанию 78) |
 | `--script FILE` | выполнить команды из файла, затем продолжить вручную |
-| `--demo FILE` | то же, но команды вводятся медленно, как при записи видео |
 
 ## Как играть
 
@@ -67,7 +66,6 @@ cmake --build build
 src/          исходный код: app, core, commands, parser, systems, model, data, ui, common
 data/         конфиг баланса, комнаты, предметы, враги, тексты, словарь команд
 art/          ASCII-арт
-demo/         сценарий демо
 tests/        тесты (doctest) и сценарий полного прохождения
 third_party/  nlohmann/json, doctest
 docs/         GDD, архитектура, питч, видео

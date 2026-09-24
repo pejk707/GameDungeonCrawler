@@ -31,7 +31,6 @@ set_target_properties(lamplighter PROPERTIES
 add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data ${CMAKE_BINARY_DIR}/data
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/art ${CMAKE_BINARY_DIR}/art
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/demo ${CMAKE_BINARY_DIR}/demo
     COMMENT "Copying game data")
 add_dependencies(lamplighter copy_assets)
 

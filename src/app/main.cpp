@@ -48,9 +48,8 @@ std::vector<std::string> readLines(const fs::path& file) {
 
 void printUsage() {
     std::cout << "Usage: lamplighter [--data DIR] [--seed N] [--no-color] [--width N]\n"
-                 "                   [--script FILE] [--demo FILE] [--demo-speed MS]\n"
-                 "  --script FILE   read commands from FILE, then continue interactively\n"
-                 "  --demo FILE     like --script, but types commands slowly (for recording video)\n";
+                 "                   [--script FILE]\n"
+                 "  --script FILE   read commands from FILE, then continue interactively\n";
 }
 
 }  // namespace
@@ -58,8 +57,6 @@ void printUsage() {
 int main(int argc, char** argv) {
     ll::Options options;
     std::string scriptFile;
-    bool demo = false;
-    int demoCharMs = 45;
 
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -74,11 +71,6 @@ int main(int argc, char** argv) {
             options.width = std::stoi(next());
         } else if (arg == "--script") {
             scriptFile = next();
-        } else if (arg == "--demo") {
-            scriptFile = next();
-            demo = true;
-        } else if (arg == "--demo-speed") {
-            demoCharMs = std::stoi(next());
         } else if (arg == "--help" || arg == "-h") {
             printUsage();
             return 0;
@@ -89,7 +81,6 @@ int main(int argc, char** argv) {
         }
     }
     if (options.root.empty()) options.root = findRoot(executableDir(argv[0]));
-    if (demo && !options.seed) options.seed = 7;  // демо всегда проигрывается одинаково
 
     std::unique_ptr<ll::IConsole> console = ll::makeSystemConsole();
     if (!scriptFile.empty()) {
@@ -98,12 +89,7 @@ int main(int argc, char** argv) {
             std::cerr << "Script file is empty or missing: " << scriptFile << "\n";
             return 2;
         }
-        ll::ScriptConsole::Timing timing;
-        if (demo) {
-            timing = {demoCharMs, 700, 300};
-            if (console->supportsColor()) console->write("\x1b[2J\x1b[H");  // чистый экран для записи видео
-        }
-        console = std::make_unique<ll::ScriptConsole>(std::move(console), std::move(lines), timing, true);
+        console = std::make_unique<ll::ScriptConsole>(std::move(console), std::move(lines), true);
     }
 
     ll::Game game(options, std::move(console));

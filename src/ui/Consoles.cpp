@@ -1,7 +1,5 @@
-#include <chrono>
 #include <cstdio>
 #include <iostream>
-#include <thread>
 
 #include "common/Utf8.h"
 #include "ui/IConsole.h"
@@ -14,10 +12,6 @@
 
 namespace ll {
 namespace {
-
-void sleepMs(int ms) {
-    if (ms > 0) std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-}
 
 std::optional<std::string> readStdLine() {
     std::string line;
@@ -93,7 +87,6 @@ public:
     }
 
     bool supportsColor() const override { return color_; }
-    void pause(int ms) override { sleepMs(ms); }
 
 private:
     HANDLE in_ = nullptr;
@@ -111,7 +104,6 @@ public:
     std::optional<std::string> readLine() override { return readStdLine(); }
     void write(std::string_view text) override { std::cout << text << std::flush; }
     bool supportsColor() const override { return color_; }
-    void pause(int ms) override { sleepMs(ms); }
 
 private:
     bool color_;
@@ -130,29 +122,16 @@ std::unique_ptr<IConsole> makeSystemConsole() {
 }
 
 ScriptConsole::ScriptConsole(std::unique_ptr<IConsole> inner, std::vector<std::string> lines,
-                             Timing timing, bool continueInteractive)
-    : inner_(std::move(inner)),
-      lines_(lines.begin(), lines.end()),
-      timing_(timing),
-      continueInteractive_(continueInteractive) {}
+                             bool continueInteractive)
+    : inner_(std::move(inner)), lines_(lines.begin(), lines.end()), continueInteractive_(continueInteractive) {}
 
 std::optional<std::string> ScriptConsole::readLine() {
     while (!lines_.empty()) {
         std::string line = lines_.front();
         lines_.pop_front();
         if (!line.empty() && line.back() == '\r') line.pop_back();
-        if (utf8::startsWith(line, "#pause")) {
-            inner_->pause(std::atoi(line.c_str() + 6));
-            continue;
-        }
-        if (utf8::startsWith(line, "#")) continue;
-        inner_->pause(timing_.beforeMs);
-        for (char32_t c : utf8::decode(line)) {
-            inner_->write(utf8::encode(c));
-            inner_->pause(timing_.charMs);
-        }
-        inner_->write("\n");
-        inner_->pause(timing_.afterMs);
+        if (line.empty() || utf8::startsWith(line, "#")) continue;
+        inner_->write(line + "\n");
         return line;
     }
     if (continueInteractive_) return inner_->readLine();
