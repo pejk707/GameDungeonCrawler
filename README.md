@@ -22,7 +22,6 @@ Windows: нужна Visual Studio 2022 с компонентом «Разраб�
 build.bat          :: собрать в папку build\
 play.bat           :: запустить игру
 build.bat test     :: собрать и запустить тесты
-demo.bat           :: 30-секундное демо (команды вводятся сами)
 ```
 
 Linux / macOS:
